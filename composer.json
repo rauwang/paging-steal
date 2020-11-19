@@ -2,6 +2,7 @@
     "name": "rauwang/paging-steal",
     "type": "library",
     "description": "遍历分页爬取，记录爬取断点，断点续爬",
+	"license": "MIT",
     "authors": [
         {
             "name": "rauwang",
