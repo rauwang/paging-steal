@@ -1,0 +1,19 @@
+{
+    "name": "rauwang/paging-steal",
+    "type": "library",
+    "description": "遍历分页爬取，记录爬取断点，断点续爬",
+    "authors": [
+        {
+            "name": "rauwang",
+            "email": "hi.rauwang@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Rauwang\\PagingSteal": "/src"
+        }
+    }
+}
