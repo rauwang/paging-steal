@@ -13,7 +13,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Rauwang\\PagingSteal": "/src"
+            "Rauwang\\PagingSteal\\": "/src"
         }
     }
 }
