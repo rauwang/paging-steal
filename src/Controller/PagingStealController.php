@@ -45,9 +45,9 @@ class PagingStealController
      * @throws \Exception
      */
     public static function build(array $ini) : self {
-        if (empty($ini['pagingStealClass']))
+        if (empty($ini['PagingSteal']))
             throw new DriverClassIniException(PagingSteal::class);
-        $pagingStealClass = $ini['pagingStealClass'];
+        $pagingStealClass = $ini['PagingSteal'];
         if (!is_subclass_of($pagingStealClass, PagingSteal::class))
             throw new DriverClassException($pagingStealClass, PagingSteal::class);
         if (empty(self::$stealPagingControllerCache[$pagingStealClass])) {
