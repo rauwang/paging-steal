@@ -5,12 +5,12 @@
  * description:
  */
 
-namespace Rauwang\Controller;
+namespace Rauwang\PagingSteal\Controller;
 
-use Rauwang\Driver\PagingSteal;
-use Rauwang\Exception\DriverClassException;
-use Rauwang\Exception\DriverClassIniException;
-use Rauwang\Exception\OverLastPageException;
+use Rauwang\PagingSteal\Driver\PagingSteal;
+use Rauwang\PagingSteal\Exception\DriverClassException;
+use Rauwang\PagingSteal\Exception\DriverClassIniException;
+use Rauwang\PagingSteal\Exception\OverLastPageException;
 
 class PagingStealController
 {

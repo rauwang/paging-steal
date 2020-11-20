@@ -5,7 +5,7 @@
  * description:
  */
 
-namespace Rauwang\Exception;
+namespace Rauwang\PagingSteal\Exception;
 
 class DriverClassIniException extends \Exception
 {

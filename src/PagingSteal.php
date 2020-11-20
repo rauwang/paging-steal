@@ -5,14 +5,14 @@
  * description:
  */
 
-namespace Rauwang;
+namespace Rauwang\PagingSteal;
 
-use Rauwang\Controller\StealBreakpointController;
-use Rauwang\Controller\PagingStealController;
-use Rauwang\Controller\StealDataPageController;
-use Rauwang\Controller\StealTargetController;
-use Rauwang\Exception\DriverClassException;
-use Rauwang\Exception\DriverClassIniException;
+use Rauwang\PagingSteal\Controller\StealBreakpointController;
+use Rauwang\PagingSteal\Controller\PagingStealController;
+use Rauwang\PagingSteal\Controller\StealDataPageController;
+use Rauwang\PagingSteal\Controller\StealTargetController;
+use Rauwang\PagingSteal\Exception\DriverClassException;
+use Rauwang\PagingSteal\Exception\DriverClassIniException;
 
 class PagingSteal
 {

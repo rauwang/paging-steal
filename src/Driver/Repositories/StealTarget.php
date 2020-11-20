@@ -5,7 +5,7 @@
  * description:
  */
 
-namespace Rauwang\Driver\Repositories;
+namespace Rauwang\PagingSteal\Driver\Repositories;
 
 abstract class StealTarget
 {

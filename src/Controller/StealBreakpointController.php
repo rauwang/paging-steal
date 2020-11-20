@@ -5,11 +5,11 @@
  * description:
  */
 
-namespace Rauwang\Controller;
+namespace Rauwang\PagingSteal\Controller;
 
-use Rauwang\Driver\Repositories\StealBreakpoint;
-use Rauwang\Exception\DriverClassException;
-use Rauwang\Exception\DriverClassIniException;
+use Rauwang\PagingSteal\Driver\Repositories\StealBreakpoint;
+use Rauwang\PagingSteal\Exception\DriverClassException;
+use Rauwang\PagingSteal\Exception\DriverClassIniException;
 
 class StealBreakpointController
 {

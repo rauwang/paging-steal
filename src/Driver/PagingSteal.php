@@ -5,7 +5,7 @@
  * description:
  */
 
-namespace Rauwang\Driver;
+namespace Rauwang\PagingSteal\Driver;
 
 interface PagingSteal
 {
