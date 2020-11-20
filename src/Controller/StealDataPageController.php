@@ -7,7 +7,7 @@
 
 namespace Rauwang\PagingSteal\Controller;
 
-use Rauwang\Driver\Repositories\StealDataPage;
+use Rauwang\PagingSteal\Driver\Repositories\StealDataPage;
 use Rauwang\PagingSteal\Exception\DriverClassException;
 use Rauwang\PagingSteal\Exception\DriverClassIniException;
 
