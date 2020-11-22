@@ -9,15 +9,15 @@ namespace Rauwang\PagingSteal\Driver;
 
 interface PagingSteal
 {
-    public static function getFirstPageUrl() : \string ;
+    public static function getFirstPageUrl() : string ;
 
-    public function setUrl(\string $url) : void ;
+    public function setUrl(string $url) : void ;
 
-    public function nextUrl(\int $offset) : \string ;
+    public function nextUrl(int $offset) : string ;
 
-    public function getFirstNodeUrl() : \string ;
+    public function getFirstNodeUrl() : string ;
 
-    public function getLastNodeUrl() : \string ;
+    public function getLastNodeUrl() : string ;
 
     public function fetchDataPageUrlList() : array ;
 }

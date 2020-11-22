@@ -38,7 +38,7 @@ class PagingSteal
      * @throws DriverClassException
      * @throws DriverClassIniException
      */
-    public static function init (\string $stealTargetClass, \string $stealBreakpointClass, \string $stealDataPageClass) : void {
+    public static function init (string $stealTargetClass, string $stealBreakpointClass, string $stealDataPageClass) : void {
         StealTargetController::initStealTargetClass($stealTargetClass);
         StealDataPageController::initStealDataPageClass($stealDataPageClass);
         StealBreakpointController::initStealBreakpointClass($stealBreakpointClass);
@@ -51,7 +51,7 @@ class PagingSteal
      * @throws DriverClassException
      * @throws DriverClassIniException
      */
-    public static function build(\string $pagingStealClass) : self {
+    public static function build(string $pagingStealClass) : self {
         if (empty(self::$breakpointController))
             self::$breakpointController = new StealBreakpointController();
         return new self(PagingStealController::build($pagingStealClass));

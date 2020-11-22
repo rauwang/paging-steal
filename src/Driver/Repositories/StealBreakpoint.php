@@ -9,17 +9,17 @@ namespace Rauwang\PagingSteal\Driver\Repositories;
 
 abstract class StealBreakpoint
 {
-    abstract public static function exists(\int $targetId, \int $generation) : \bool ;
+    abstract public static function exists(int $targetId, int $generation) : bool ;
 
-    abstract public static function findLastCreateBreakpoint(\int $targetId, \int $generation) : self ;
+    abstract public static function findLastCreateBreakpoint(int $targetId, int $generation) : self ;
 
-    abstract public static function create(\int $targetId, \int $generation, \string $url) : self ;
+    abstract public static function create(int $targetId, int $generation, string $url) : self ;
 
-    abstract public static function fetchBreakpointCount(\int $targetId, \int $generation) : \int ;
+    abstract public static function fetchBreakpointCount(int $targetId, int $generation) : int ;
 
     protected function __construct() { }
 
-    abstract public function getId() : \int ;
+    abstract public function getId() : int ;
 
-    abstract public function getUrl() : \string ;
+    abstract public function getUrl() : string ;
 }

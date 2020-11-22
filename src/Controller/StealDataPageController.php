@@ -24,7 +24,7 @@ class StealDataPageController
      * @throws DriverClassException
      * @throws DriverClassIniException
      */
-    public static function initStealDataPageClass(\string $stealDataPageClass) : void {
+    public static function initStealDataPageClass(string $stealDataPageClass) : void {
         if (empty($stealDataPageClass[0]))
             throw new DriverClassIniException(StealDataPage::class);
         if (!is_subclass_of($stealDataPageClass, StealDataPage::class))
@@ -41,19 +41,19 @@ class StealDataPageController
             throw new DriverClassIniException(StealDataPage::class);
     }
 
-    private function urlHash(\string $url) : \string {
+    private function urlHash(string $url) : string {
         return hash('md4', $url);
     }
 
-    public function isStole(\string $url) : \bool {
+    public function isStole(string $url) : bool {
         return self::$stealDataPageClass::exists($this->urlHash($url));
     }
 
-    public function findDataPage(\string $url) : StealDataPage {
+    public function findDataPage(string $url) : StealDataPage {
         return self::$stealDataPageClass::find($this->urlHash($url));
     }
 
-    public function create(array $urlList, \int $breakpointId, \int $generation) : void {
+    public function create(array $urlList, int $breakpointId, int $generation) : void {
         foreach ($urlList as $url) {
             if ($this->isStole($url)) continue;
             self::$stealDataPageClass::create($breakpointId, $generation, $this->urlHash($url), $url);

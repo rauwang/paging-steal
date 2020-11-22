@@ -44,7 +44,7 @@ class PagingStealController
      * @throws DriverClassIniException
      * @throws \Exception
      */
-    public static function build(\string $pagingStealClass) : self {
+    public static function build(string $pagingStealClass) : self {
         if (empty($pagingStealClass[0]))
             throw new DriverClassIniException(PagingSteal::class);
         if (!is_subclass_of($pagingStealClass, PagingSteal::class))
@@ -67,12 +67,12 @@ class PagingStealController
         $this->dataPageController = new StealDataPageController();
     }
 
-    public function setUrl(\string $url) : void {
+    public function setUrl(string $url) : void {
         $this->currentUrl = $url;
         $this->stealPaging->setUrl($url);
     }
 
-    public function isStole() : \bool {
+    public function isStole() : bool {
         if (!$this->dataPageController->isStole($this->stealPaging->getFirstNodeUrl())) return false;
         return $this->dataPageController->isStole($this->stealPaging->getLastNodeUrl());
     }
@@ -83,7 +83,7 @@ class PagingStealController
      * @return string
      * @throws OverLastPageException
      */
-    public function nextUrl(\int $offset=1) : \string {
+    public function nextUrl(int $offset=1) : string {
         $nextUrl = $this->stealPaging->nextUrl($offset);
         if (empty($nextUrl[0]))
             throw new OverLastPageException();

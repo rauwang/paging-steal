@@ -29,7 +29,7 @@ class StealTargetController
      * @throws DriverClassException
      * @throws DriverClassIniException
      */
-    public static function initStealTargetClass(\string $stealTargetClass) : void {
+    public static function initStealTargetClass(string $stealTargetClass) : void {
         if (empty($stealTargetClass[0]))
             throw new DriverClassIniException(StealTarget::class);
         if (!is_subclass_of($stealTargetClass, StealTarget::class))
@@ -44,7 +44,7 @@ class StealTargetController
      *
      * @throws \Exception
      */
-    public function __construct(\string $url) {
+    public function __construct(string $url) {
         if (empty(self::$stealTargetClass))
             throw new \Exception('$stealTargetClass不能为空');
 
@@ -60,14 +60,14 @@ class StealTargetController
     /**
      * @return int [对象id]
      */
-    public function getId() : \int {
+    public function getId() : int {
         return $this->stealTarget->getId();
     }
 
     /**
      * @return int [世代编号]
      */
-    public function getGeneration() : \int {
+    public function getGeneration() : int {
         return $this->stealTarget->getGeneration();
     }
 
@@ -78,7 +78,7 @@ class StealTargetController
      *
      * @return int
      */
-    public function crossGeneration(\int $offset) : \int {
+    public function crossGeneration(int $offset) : int {
         $generation = $this->stealTarget->getGeneration() + $offset;
         $this->stealTarget->updateGeneration($generation);
         return $generation;
