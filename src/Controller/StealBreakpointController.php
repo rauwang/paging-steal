@@ -19,15 +19,14 @@ class StealBreakpointController
     private static $stealBreakpointClass;
 
     /**
-     * @param array $ini [配置参数]
+     * @param string $stealBreakpointClass
      *
      * @throws DriverClassException
      * @throws DriverClassIniException
      */
-    public static function initStealBreakpointClass(array $ini) : void {
-        if (empty($ini['StealBreakpoint']))
+    public static function initStealBreakpointClass(\string $stealBreakpointClass) : \void {
+        if (empty($stealBreakpointClass[0]))
             throw new DriverClassIniException(StealBreakpoint::class);
-        $stealBreakpointClass = $ini['StealBreakpoint'];
         if (!is_subclass_of($stealBreakpointClass, StealBreakpoint::class))
             throw new DriverClassException($stealBreakpointClass, StealBreakpoint::class);
         self::$stealBreakpointClass = $stealBreakpointClass;
@@ -42,25 +41,20 @@ class StealBreakpointController
             throw new DriverClassIniException(StealBreakpoint::class);
     }
 
-    public function create(string $url, int $targetId, int $generation) : int {
-        $breakpoint = self::$stealBreakpointClass::create([
-            'target_id' => $targetId,
-            'generation' => $generation,
-            'hash_url' => hash('md4', $url),
-            'url' => $url,
-        ]);
+    public function create(\int $targetId, \int $generation, \string $url) : \int {
+        $breakpoint = self::$stealBreakpointClass::create($targetId, $generation, $url);
         return $breakpoint->getId();
     }
 
-    public function hasBreakpoint(int $targetId, int $currentGeneration) : bool {
+    public function hasBreakpoint(\int $targetId, \int $currentGeneration) : \bool {
         return self::$stealBreakpointClass::exists($targetId, $currentGeneration);
     }
 
-    public function countBreakpointLength(int $targetId, int $generation) : int {
+    public function countBreakpointLength(\int $targetId, \int $generation) : \int {
         return self::$stealBreakpointClass::fetchBreakpointCount($targetId, $generation);
     }
 
-    public function findOriginBreakpointUrl(int $targetId, int $generation) : string {
+    public function findOriginBreakpointUrl(\int $targetId, \int $generation) : \string {
         $breakpoint = self::$stealBreakpointClass::findLastCreateBreakpoint($targetId, $generation);
         return $breakpoint->getUrl();
     }

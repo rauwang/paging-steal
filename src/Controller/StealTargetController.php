@@ -24,15 +24,14 @@ class StealTargetController
     private $stealTarget;
 
     /**
-     * @param array $ini [配置参数]
+     * @param string $stealTargetClass
      *
      * @throws DriverClassException
      * @throws DriverClassIniException
      */
-    public static function initStealTargetClass(array $ini) : void {
-        if (empty($ini['StealTarget']))
+    public static function initStealTargetClass(\string $stealTargetClass) : \void {
+        if (empty($stealTargetClass[0]))
             throw new DriverClassIniException(StealTarget::class);
-        $stealTargetClass = $ini['StealTarget'];
         if (!is_subclass_of($stealTargetClass, StealTarget::class))
             throw new DriverClassException($stealTargetClass, StealTarget::class);
         self::$stealTargetClass = $stealTargetClass;
@@ -41,38 +40,34 @@ class StealTargetController
     /**
      * TargetController constructor.
      *
-     * @param string $urlHost
+     * @param string $url
      *
      * @throws \Exception
      */
-    public function __construct(string $urlHost) {
+    public function __construct(\string $url) {
         if (empty(self::$stealTargetClass))
             throw new \Exception('$stealTargetClass不能为空');
 
-        $hashKey = hash('md4', $urlHost);
+        $hashKey = hash('md4', $url);
         if (self::$stealTargetClass::exists($hashKey)) {
             $this->stealTarget = self::$stealTargetClass::find($hashKey);
             return;
         }
         // 创建对象
-        $this->stealTarget = self::$stealTargetClass::create([
-            'hash_url_host' => $hashKey,
-            'url_host' => $urlHost,
-            'generation' => 1,
-        ]);
+        $this->stealTarget = self::$stealTargetClass::create($url, $hashKey, 1);
     }
 
     /**
      * @return int [对象id]
      */
-    public function getId() : int {
+    public function getId() : \int {
         return $this->stealTarget->getId();
     }
 
     /**
      * @return int [世代编号]
      */
-    public function getGeneration() : int {
+    public function getGeneration() : \int {
         return $this->stealTarget->getGeneration();
     }
 
@@ -83,7 +78,7 @@ class StealTargetController
      *
      * @return int
      */
-    public function crossGeneration(int $offset) : int {
+    public function crossGeneration(\int $offset) : \int {
         $generation = $this->stealTarget->getGeneration() + $offset;
         $this->stealTarget->updateGeneration($generation);
         return $generation;

@@ -37,17 +37,16 @@ class PagingStealController
     private static $stealPagingControllerCache = [];
 
     /**
-     * @param array $ini [配置参数]
+     * @param string $pagingStealClass
      *
      * @return PagingStealController
      * @throws DriverClassException
      * @throws DriverClassIniException
      * @throws \Exception
      */
-    public static function build(array $ini) : self {
-        if (empty($ini['PagingSteal']))
+    public static function build(\string $pagingStealClass) : self {
+        if (empty($pagingStealClass[0]))
             throw new DriverClassIniException(PagingSteal::class);
-        $pagingStealClass = $ini['PagingSteal'];
         if (!is_subclass_of($pagingStealClass, PagingSteal::class))
             throw new DriverClassException($pagingStealClass, PagingSteal::class);
         if (empty(self::$stealPagingControllerCache[$pagingStealClass])) {
@@ -64,16 +63,16 @@ class PagingStealController
      */
     private function __construct(PagingSteal $stealPaging) {
         $this->stealPaging = $stealPaging;
-        $this->targetController = new StealTargetController($this->stealPaging::getUrlHost());
+        $this->targetController = new StealTargetController($this->stealPaging::getFirstPageUrl());
         $this->dataPageController = new StealDataPageController();
     }
 
-    public function setUrl(string $url) : void {
+    public function setUrl(\string $url) : \void {
         $this->currentUrl = $url;
         $this->stealPaging->setUrl($url);
     }
 
-    public function isStole() : bool {
+    public function isStole() : \bool {
         if (!$this->dataPageController->isStole($this->stealPaging->getFirstNodeUrl())) return false;
         return $this->dataPageController->isStole($this->stealPaging->getLastNodeUrl());
     }
@@ -84,19 +83,19 @@ class PagingStealController
      * @return string
      * @throws OverLastPageException
      */
-    public function nextUrl(int $offset=1) : string {
+    public function nextUrl(\int $offset=1) : \string {
         $nextUrl = $this->stealPaging->nextUrl($offset);
         if (empty($nextUrl[0]))
             throw new OverLastPageException();
         return $nextUrl;
     }
 
-    public function nextGeneration() : void {
+    public function nextGeneration() : \void {
         $this->targetController->crossGeneration(1);
         $this->resetToFirstPage();
     }
 
-    public function resetToFirstPage() : void {
+    public function resetToFirstPage() : \void {
         $this->setUrl($this->stealPaging::getFirstPageUrl());
     }
 
@@ -107,7 +106,7 @@ class PagingStealController
      *
      * @throws OverLastPageException
      */
-    private function locateToBreakpoint(StealBreakpointController $breakpointController) : void {
+    private function locateToBreakpoint(StealBreakpointController $breakpointController) : \void {
         $targetId = $this->targetController->getId();
         $generation = $this->targetController->getGeneration();
         $breakpointCount = $breakpointController->countBreakpointLength($targetId, $generation);
@@ -121,8 +120,10 @@ class PagingStealController
         $dataPage = $this->dataPageController->findDataPage($this->stealPaging->getLastNodeUrl());
         $breakpointIdx = $dataPage->getBreakpointId();
         // 以此算出偏移到实际断点位置的偏移值
-        $offset = ($breakpointCount - $breakpointIdx) + 1;
+        $offset = $breakpointCount - $breakpointIdx;
         $this->setUrl($this->nextUrl($offset));
+        // 判断断点分页是否已全部爬取过，如果是，则分页+1
+        if ($this->isStole()) $this->setUrl($this->nextUrl(1));
     }
 
     /**
@@ -132,7 +133,7 @@ class PagingStealController
      *
      * @throws \Exception
      */
-    public function handlePaging(StealBreakpointController $breakpointController) : void {
+    public function handlePaging(StealBreakpointController $breakpointController) : \void {
         if ($breakpointController->hasBreakpoint($this->targetController->getId(), $this->targetController->getGeneration())) {
             $this->locateToBreakpoint($breakpointController);
         } else {
@@ -147,7 +148,7 @@ class PagingStealController
                     break;
                 $this->nextGeneration();
             } else {
-                $breakpointId = $breakpointController->create($this->currentUrl, $this->targetController->getId(),$this->targetController->getGeneration());
+                $breakpointId = $breakpointController->create($this->targetController->getId(), $this->targetController->getGeneration(), $this->currentUrl);
                 $dataPageUrlList = $this->stealPaging->fetchDataPageUrlList();
                 $this->dataPageController->create($dataPageUrlList, $breakpointId, $this->targetController->getGeneration());
                 try {

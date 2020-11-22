@@ -31,36 +31,36 @@ class PagingSteal
     }
 
     /**
-     * @param array $ini
+     * @param string $stealTargetClass
+     * @param string $stealBreakpointClass
+     * @param string $stealDataPageClass
      *
      * @throws DriverClassException
      * @throws DriverClassIniException
      */
-    public static function config (array $ini) : void {
-        StealDataPageController::initStealDataPageClass($ini);
-        StealBreakpointController::initStealBreakpointClass($ini);
-        StealTargetController::initStealTargetClass($ini);
+    public static function init (\string $stealTargetClass, \string $stealBreakpointClass, \string $stealDataPageClass) : \void {
+        StealTargetController::initStealTargetClass($stealTargetClass);
+        StealDataPageController::initStealDataPageClass($stealDataPageClass);
+        StealBreakpointController::initStealBreakpointClass($stealBreakpointClass);
     }
 
     /**
-     * @param array $ini
+     * @param string $pagingStealClass
      *
      * @return PagingSteal
      * @throws DriverClassException
      * @throws DriverClassIniException
-     * @throws \Exception
      */
-    public static function build(array $ini) : self {
+    public static function build(\string $pagingStealClass) : self {
         if (empty(self::$breakpointController))
             self::$breakpointController = new StealBreakpointController();
-        return new self(PagingStealController::build($ini));
+        return new self(PagingStealController::build($pagingStealClass));
     }
 
-    public function steal() {
-        try {
-            $this->pagingController->handlePaging(self::$breakpointController);
-        } catch (\Exception $e) {
-            echo $e->getMessage();
-        }
+    /**
+     * @throws \Exception
+     */
+    public function steal() : \void{
+        $this->pagingController->handlePaging(self::$breakpointController);
     }
 }
