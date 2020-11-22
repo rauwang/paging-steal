@@ -54,6 +54,10 @@ class StealBreakpointController
         return self::$stealBreakpointClass::fetchBreakpointCount($targetId, $generation);
     }
 
+    public function countLengthAfterThisBreakpointId(int $breakpointId, int $targetId, int $generation) : int {
+        return self::$stealBreakpointClass::countLengthAfterThisBreakpointId($breakpointId, $targetId, $generation);
+    }
+
     public function findOriginBreakpointUrl(int $targetId, int $generation) : string {
         $breakpoint = self::$stealBreakpointClass::findLastCreateBreakpoint($targetId, $generation);
         return $breakpoint->getUrl();

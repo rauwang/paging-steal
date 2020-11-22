@@ -118,9 +118,8 @@ class PagingStealController
         }
         // 根据分页最后一节点，确认该断点是占断点长度的哪个位置
         $dataPage = $this->dataPageController->findDataPage($this->stealPaging->getLastNodeUrl());
-        $breakpointIdx = $dataPage->getBreakpointId();
         // 以此算出偏移到实际断点位置的偏移值
-        $offset = $breakpointCount - $breakpointIdx;
+        $offset = $breakpointController->countLengthAfterThisBreakpointId($dataPage->getBreakpointId(), $targetId, $generation);
         $this->setUrl($this->nextUrl($offset));
         // 判断断点分页是否已全部爬取过，如果是，则分页+1
         if ($this->isStole()) $this->setUrl($this->nextUrl(1));
