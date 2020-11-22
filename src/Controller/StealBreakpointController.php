@@ -24,7 +24,7 @@ class StealBreakpointController
      * @throws DriverClassException
      * @throws DriverClassIniException
      */
-    public static function initStealBreakpointClass(\string $stealBreakpointClass) : \void {
+    public static function initStealBreakpointClass(\string $stealBreakpointClass) : void {
         if (empty($stealBreakpointClass[0]))
             throw new DriverClassIniException(StealBreakpoint::class);
         if (!is_subclass_of($stealBreakpointClass, StealBreakpoint::class))

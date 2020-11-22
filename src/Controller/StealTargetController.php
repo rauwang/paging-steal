@@ -29,7 +29,7 @@ class StealTargetController
      * @throws DriverClassException
      * @throws DriverClassIniException
      */
-    public static function initStealTargetClass(\string $stealTargetClass) : \void {
+    public static function initStealTargetClass(\string $stealTargetClass) : void {
         if (empty($stealTargetClass[0]))
             throw new DriverClassIniException(StealTarget::class);
         if (!is_subclass_of($stealTargetClass, StealTarget::class))

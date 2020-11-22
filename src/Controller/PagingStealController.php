@@ -67,7 +67,7 @@ class PagingStealController
         $this->dataPageController = new StealDataPageController();
     }
 
-    public function setUrl(\string $url) : \void {
+    public function setUrl(\string $url) : void {
         $this->currentUrl = $url;
         $this->stealPaging->setUrl($url);
     }
@@ -90,12 +90,12 @@ class PagingStealController
         return $nextUrl;
     }
 
-    public function nextGeneration() : \void {
+    public function nextGeneration() : void {
         $this->targetController->crossGeneration(1);
         $this->resetToFirstPage();
     }
 
-    public function resetToFirstPage() : \void {
+    public function resetToFirstPage() : void {
         $this->setUrl($this->stealPaging::getFirstPageUrl());
     }
 
@@ -106,7 +106,7 @@ class PagingStealController
      *
      * @throws OverLastPageException
      */
-    private function locateToBreakpoint(StealBreakpointController $breakpointController) : \void {
+    private function locateToBreakpoint(StealBreakpointController $breakpointController) : void {
         $targetId = $this->targetController->getId();
         $generation = $this->targetController->getGeneration();
         $breakpointCount = $breakpointController->countBreakpointLength($targetId, $generation);
@@ -133,7 +133,7 @@ class PagingStealController
      *
      * @throws \Exception
      */
-    public function handlePaging(StealBreakpointController $breakpointController) : \void {
+    public function handlePaging(StealBreakpointController $breakpointController) : void {
         if ($breakpointController->hasBreakpoint($this->targetController->getId(), $this->targetController->getGeneration())) {
             $this->locateToBreakpoint($breakpointController);
         } else {

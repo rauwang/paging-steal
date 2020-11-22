@@ -11,7 +11,7 @@ interface PagingSteal
 {
     public static function getFirstPageUrl() : \string ;
 
-    public function setUrl(\string $url) : \void ;
+    public function setUrl(\string $url) : void ;
 
     public function nextUrl(\int $offset) : \string ;
 
