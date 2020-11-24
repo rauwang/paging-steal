@@ -130,8 +130,9 @@ class PagingStealController
         $isStoleWithFirstNode = $this->isStoleWithFirstNode();
         if ($isStoleWithFirstNode && $isStoleWithLastNode) { // 当前分页已爬取过
             // 若当前分页没有跨世代，则定位到现断点的位置
-            if ($this->isEqualGenerationWithDataPagesInCurrentPaging($breakpointController)) return 0;
-            return $breakpointId;
+            if (!$this->isEqualGenerationWithDataPagesInCurrentPaging($breakpointController)) return $breakpointId;
+            if ($this->currentUrl == $originBreakpointUrl) return $breakpointId; // 当节点的世代相同，且没有发生偏移时
+            return 0;
         }
         // 头节点已爬取，尾节点未爬取，则返回当前断点id
         if ($isStoleWithFirstNode) return $breakpointId;
@@ -172,7 +173,7 @@ class PagingStealController
         $lastDataPage = $this->dataPageController->findDataPage($this->stealPaging->getLastNodeUrl());
         if ($firstDataPage->getGeneration() === $lastDataPage->getGeneration()) {
             $offset = $breakpointController->countLengthAfterThisBreakpointId($lastDataPage->getBreakpointId(), $this->targetController->getId(), $this->targetController->getGeneration());
-            $this->setUrl($this->nextUrl($offset));
+            if (0 < $offset) $this->setUrl($this->nextUrl($offset));
             return true;
         } return false;
     }
