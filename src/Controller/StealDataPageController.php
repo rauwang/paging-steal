@@ -67,7 +67,7 @@ class StealDataPageController
      */
     public function create(string $url, int $breakpointId, int $generation) : void {
         if ($this->isStole($url)) {
-            $dataPage = self::$stealDataPageClass::find($url);
+            $dataPage = $this->findDataPage($url);
             if ($dataPage->getGeneration() === $generation) return;
             throw new CrossGenerationException();
         }
