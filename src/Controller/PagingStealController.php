@@ -227,19 +227,13 @@ class PagingStealController
      *
      * @param array $dataPageUrlList
      * @param int   $breakpointId
-     * @param int   $genration
+     * @param int   $generation
      *
      * @throws CrossGenerationException
      */
-    private function dataPageIterator(array $dataPageUrlList, int $breakpointId, int $genration) : void {
+    private function dataPageIterator(array $dataPageUrlList, int $breakpointId, int $generation) : void {
         foreach ($dataPageUrlList as $dataPageUrl) {
-            if (!$this->dataPageController->isStole($dataPageUrl)) {
-                $this->dataPageController->create($dataPageUrl, $breakpointId, $genration);
-                continue;
-            }
-            $dataPage = $this->dataPageController->findDataPage($dataPageUrl);
-            if ($dataPage->getGeneration() === $genration) continue;
-            throw new CrossGenerationException();
+            $this->dataPageController->create($dataPageUrl, $breakpointId, $generation);
         }
     }
 }

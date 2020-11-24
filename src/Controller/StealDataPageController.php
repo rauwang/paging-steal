@@ -8,6 +8,7 @@
 namespace Rauwang\PagingSteal\Controller;
 
 use Rauwang\PagingSteal\Driver\Repositories\StealDataPage;
+use Rauwang\PagingSteal\Exception\CrossGenerationException;
 use Rauwang\PagingSteal\Exception\DriverClassException;
 use Rauwang\PagingSteal\Exception\DriverClassIniException;
 
@@ -57,10 +58,19 @@ class StealDataPageController
         return self::$stealDataPageClass::existsWithBreakpoint($breakpointId, $generation);
     }
 
-    public function create(array $urlList, int $breakpointId, int $generation) : void {
-        foreach ($urlList as $url) {
-            if ($this->isStole($url)) continue;
-            self::$stealDataPageClass::create($breakpointId, $generation, $this->urlHash($url), $url);
+    /**
+     * @param string $url
+     * @param int    $breakpointId
+     * @param int    $generation
+     *
+     * @throws CrossGenerationException
+     */
+    public function create(string $url, int $breakpointId, int $generation) : void {
+        if ($this->isStole($url)) {
+            $dataPage = self::$stealDataPageClass::find($url);
+            if ($dataPage->getGeneration() === $generation) return;
+            throw new CrossGenerationException();
         }
+        self::$stealDataPageClass::create($breakpointId, $generation, $this->urlHash($url), $url);
     }
 }
