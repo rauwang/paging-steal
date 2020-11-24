@@ -61,6 +61,6 @@ class PagingSteal
      * @throws \Exception
      */
     public function steal() : void{
-        $this->pagingController->handlePaging(self::$breakpointController);
+        $this->pagingController->pagingHandler(self::$breakpointController);
     }
 }

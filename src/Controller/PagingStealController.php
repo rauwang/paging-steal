@@ -8,6 +8,7 @@
 namespace Rauwang\PagingSteal\Controller;
 
 use Rauwang\PagingSteal\Driver\PagingSteal;
+use Rauwang\PagingSteal\Exception\CrossGenerationException;
 use Rauwang\PagingSteal\Exception\DriverClassException;
 use Rauwang\PagingSteal\Exception\DriverClassIniException;
 use Rauwang\PagingSteal\Exception\OverLastPageException;
@@ -73,7 +74,15 @@ class PagingStealController
     }
 
     public function isStole() : bool {
-        if (!$this->dataPageController->isStole($this->stealPaging->getFirstNodeUrl())) return false;
+        if (!$this->isStoleWithFirstNode()) return false;
+        return $this->isStoleWithLastNode();
+    }
+
+    private function isStoleWithFirstNode() : bool {
+        return $this->dataPageController->isStole($this->stealPaging->getFirstNodeUrl());
+    }
+
+    private function isStoleWithLastNode() : bool {
         return $this->dataPageController->isStole($this->stealPaging->getLastNodeUrl());
     }
 
@@ -104,25 +113,68 @@ class PagingStealController
      *
      * @param StealBreakpointController $breakpointController
      *
+     * @return int [断点id，0表示没有断点id]
      * @throws OverLastPageException
      */
-    private function locateToBreakpoint(StealBreakpointController $breakpointController) : void {
+    private function locateToBreakpoint(StealBreakpointController $breakpointController) {
         $targetId = $this->targetController->getId();
         $generation = $this->targetController->getGeneration();
-        $breakpointCount = $breakpointController->countBreakpointLength($targetId, $generation);
-        $breakpointUrl = $breakpointController->findOriginBreakpointUrl($targetId, $generation);
-        while (true) { // 定位到(原)断点的位置
-            $this->setUrl($breakpointUrl);
-            if ($this->isStole()) break;
-            $breakpointUrl = $this->nextUrl($breakpointCount);
+
+        $lastBreakpoint = $breakpointController->findLastCreateBreakpoint($targetId, $generation);
+        $originBreakpointUrl = $lastBreakpoint->getUrl();
+        $breakpointId = $lastBreakpoint->getId();
+        $this->setUrl($originBreakpointUrl);
+
+        // 判断并计算断点
+        $isStoleWithLastNode = $this->isStoleWithLastNode();
+        $isStoleWithFirstNode = $this->isStoleWithFirstNode();
+        if ($isStoleWithFirstNode && $isStoleWithLastNode) { // 当前分页已爬取过
+            // 若当前分页没有跨世代，则定位到现断点的位置
+            if ($this->isEqualGenerationWithDataPagesInCurrentPaging($breakpointController)) return 0;
+            return $breakpointId;
         }
-        // 根据分页最后一节点，确认该断点是占断点长度的哪个位置
-        $dataPage = $this->dataPageController->findDataPage($this->stealPaging->getLastNodeUrl());
-        // 以此算出偏移到实际断点位置的偏移值
-        $offset = $breakpointController->countLengthAfterThisBreakpointId($dataPage->getBreakpointId(), $targetId, $generation);
-        $this->setUrl($this->nextUrl($offset));
-        // 判断断点分页是否已全部爬取过，如果是，则分页+1
-        if ($this->isStole()) $this->setUrl($this->nextUrl(1));
+        // 头节点已爬取，尾节点未爬取，则返回当前断点id
+        if ($isStoleWithFirstNode) return $breakpointId;
+
+        $lastDataPage = $this->dataPageController->findDataPage($this->stealPaging->getLastNodeUrl());
+        if ($isStoleWithLastNode) { // 头节点未爬取，尾节点已爬取
+            $offset = $breakpointController->countLengthAfterThisBreakpointId($lastDataPage->getBreakpointId(), $targetId, $generation);
+            $this->setUrl($this->nextUrl($offset));
+            return 0;
+        }
+        // 根据断点记录定位到的当前分页，未爬取过的情况下（头尾节点都未爬取）
+        // 判断该断点是否存在已爬的数据页
+        // 若存在已爬的数据页，则以断点的长度为偏移值，递进到已爬的分页，并判断其节点的世代情况，返回断点id
+        if ($this->dataPageController->existsWithBreakpoint($lastDataPage->getBreakpointId(), $generation)) {
+            $offset = $breakpointController->countBreakpointLength($targetId, $generation);
+            while (true) {
+                $this->setUrl($this->nextUrl($offset));
+                if ($this->isStole()) break;
+            }
+            if ($this->isEqualGenerationWithDataPagesInCurrentPaging($breakpointController)) return 0;
+            $dataPage = $this->dataPageController->findDataPage($this->stealPaging->getFirstNodeUrl());
+            return $dataPage->getBreakpointId();
+        }
+        // 若不存在已爬的数据页，则从当前位置开始爬取
+        return $breakpointId;
+    }
+
+    /**
+     * 检查当前分页中的数据页的世代编号是否一致
+     *
+     * @param StealBreakpointController $breakpointController
+     *
+     * @return bool
+     * @throws OverLastPageException
+     */
+    private function isEqualGenerationWithDataPagesInCurrentPaging(StealBreakpointController $breakpointController) : bool {
+        $firstDataPage = $this->dataPageController->findDataPage($this->stealPaging->getFirstNodeUrl());
+        $lastDataPage = $this->dataPageController->findDataPage($this->stealPaging->getLastNodeUrl());
+        if ($firstDataPage->getGeneration() === $lastDataPage->getGeneration()) {
+            $offset = $breakpointController->countLengthAfterThisBreakpointId($lastDataPage->getBreakpointId(), $this->targetController->getId(), $this->targetController->getGeneration());
+            $this->setUrl($this->nextUrl($offset));
+            return true;
+        } return false;
     }
 
     /**
@@ -132,30 +184,62 @@ class PagingStealController
      *
      * @throws \Exception
      */
-    public function handlePaging(StealBreakpointController $breakpointController) : void {
-        if ($breakpointController->hasBreakpoint($this->targetController->getId(), $this->targetController->getGeneration())) {
-            $this->locateToBreakpoint($breakpointController);
-        } else {
-            $this->resetToFirstPage();
-        }
+    public function pagingHandler(StealBreakpointController $breakpointController) : void {
+        // 定位到分页执行的初始位置
+        $targetId = $this->targetController->getId();
+        $breakpointId = 0;
+        if ($breakpointController->hasBreakpoint($targetId, $this->targetController->getGeneration())) {
+            $breakpointId = $this->locateToBreakpoint($breakpointController); // 定位到现断点的位置
+        } else $this->resetToFirstPage();
+
+        // 循环执行分页
         while (true) {
-            if ($this->isStole()) {
-                $lastNodeUrl = $this->stealPaging->getLastNodeUrl();
-                $dataPage = $this->dataPageController->findDataPage($lastNodeUrl);
-                // 当前分页（最后一个节点）的世代编号，是否与当前的世代编号一致？
-                if ($dataPage->getGeneration() !== $this->targetController->getGeneration())
-                    break;
-                $this->nextGeneration();
-            } else {
-                $breakpointId = $breakpointController->create($this->targetController->getId(), $this->targetController->getGeneration(), $this->currentUrl);
-                $dataPageUrlList = $this->stealPaging->fetchDataPageUrlList();
-                $this->dataPageController->create($dataPageUrlList, $breakpointId, $this->targetController->getGeneration());
-                try {
-                    $this->setUrl($this->nextUrl());
-                } catch (OverLastPageException $e) {
-                    $this->nextGeneration();
-                }
+            $generation = $this->targetController->getGeneration();
+            if (0 === $breakpointId)
+                $breakpointId = $breakpointController->create($targetId, $generation, $this->currentUrl);
+            $this->paging($breakpointId, $generation);
+            $breakpointId = 0;
+        }
+    }
+
+    /**
+     * @param int $breakpointId
+     * @param     $generation
+     *
+     * @throws \Exception
+     */
+    private function paging(int $breakpointId, $generation) : void {
+        try {
+            $dataPageUrlList = $this->stealPaging->fetchDataPageUrlList();
+            $this->dataPageIterator($dataPageUrlList, $breakpointId, $generation);
+            $this->setUrl($this->nextUrl());
+        } catch (OverLastPageException $e) {
+            $this->nextGeneration();
+        } catch (CrossGenerationException $e) {
+            $this->nextGeneration();
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * 数据页链接迭代器
+     *
+     * @param array $dataPageUrlList
+     * @param int   $breakpointId
+     * @param int   $genration
+     *
+     * @throws CrossGenerationException
+     */
+    private function dataPageIterator(array $dataPageUrlList, int $breakpointId, int $genration) : void {
+        foreach ($dataPageUrlList as $dataPageUrl) {
+            if (!$this->dataPageController->isStole($dataPageUrl)) {
+                $this->dataPageController->create($dataPageUrl, $breakpointId, $genration);
+                continue;
             }
+            $dataPage = $this->dataPageController->findDataPage($dataPageUrl);
+            if ($dataPage->getGeneration() === $genration) continue;
+            throw new CrossGenerationException();
         }
     }
 }

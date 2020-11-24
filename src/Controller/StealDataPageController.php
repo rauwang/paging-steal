@@ -53,6 +53,10 @@ class StealDataPageController
         return self::$stealDataPageClass::find($this->urlHash($url));
     }
 
+    public function existsWithBreakpoint(int $breakpointId, int $generation) : bool {
+        return self::$stealDataPageClass::existsWithBreakpoint($breakpointId, $generation);
+    }
+
     public function create(array $urlList, int $breakpointId, int $generation) : void {
         foreach ($urlList as $url) {
             if ($this->isStole($url)) continue;
