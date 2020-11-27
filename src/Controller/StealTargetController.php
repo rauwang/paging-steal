@@ -48,13 +48,12 @@ class StealTargetController
         if (empty(self::$stealTargetClass))
             throw new \Exception('$stealTargetClass不能为空');
 
-        $hashKey = hash('md4', $url);
-        if (self::$stealTargetClass::exists($hashKey)) {
-            $this->stealTarget = self::$stealTargetClass::find($hashKey);
+        if (self::$stealTargetClass::exists($url)) {
+            $this->stealTarget = self::$stealTargetClass::find($url);
             return;
         }
         // 创建对象
-        $this->stealTarget = self::$stealTargetClass::create($url, $hashKey, 1);
+        $this->stealTarget = self::$stealTargetClass::create($url, 1);
     }
 
     /**

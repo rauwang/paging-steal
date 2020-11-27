@@ -42,16 +42,12 @@ class StealDataPageController
             throw new DriverClassIniException(StealDataPage::class);
     }
 
-    private function urlHash(string $url) : string {
-        return hash('md4', $url);
-    }
-
     public function isStole(string $url) : bool {
-        return self::$stealDataPageClass::exists($this->urlHash($url));
+        return self::$stealDataPageClass::exists($url);
     }
 
     public function findDataPage(string $url) : StealDataPage {
-        return self::$stealDataPageClass::find($this->urlHash($url));
+        return self::$stealDataPageClass::find($url);
     }
 
     public function existsWithBreakpoint(int $breakpointId, int $generation) : bool {
@@ -71,6 +67,6 @@ class StealDataPageController
             if ($dataPage->getGeneration() === $generation) return;
             throw new CrossGenerationException();
         }
-        self::$stealDataPageClass::create($breakpointId, $generation, $this->urlHash($url), $url);
+        self::$stealDataPageClass::create($breakpointId, $generation, $url);
     }
 }

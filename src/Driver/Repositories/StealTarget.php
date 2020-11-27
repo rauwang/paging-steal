@@ -9,11 +9,11 @@ namespace Rauwang\PagingSteal\Driver\Repositories;
 
 abstract class StealTarget
 {
-    abstract public static function exists(string $urlHash) : bool ;
+    abstract public static function exists(string $url) : bool ;
 
-    abstract public static function find(string $urlHash) : self ;
+    abstract public static function find(string $url) : self ;
 
-    abstract public static function create(string $url, string $urlHash, int $generation) : self ;
+    abstract public static function create(string $url, int $generation) : self ;
 
     protected function __construct() { }
 
