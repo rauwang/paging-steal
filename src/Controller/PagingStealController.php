@@ -69,8 +69,8 @@ class PagingStealController
     }
 
     public function setUrl(string $url) : void {
-        $this->currentUrl = $url;
         $this->stealPaging->setUrl($url);
+        $this->currentUrl = $url;
     }
 
     public function isStole() : bool {
@@ -198,29 +198,40 @@ class PagingStealController
             $generation = $this->targetController->getGeneration();
             if (0 === $breakpointId)
                 $breakpointId = $breakpointController->create($targetId, $generation, $this->currentUrl);
-            $this->paging($breakpointId, $generation);
+            try {
+                $this->paging($breakpointId, $generation);
+            } catch (\Exception $e) {
+                if (!$this->isTouchDivideException($e)) throw $e;
+                if ($this->isFirstPageUrlThatCurrentUrl()) break;
+                $this->nextGeneration();
+            }
             $breakpointId = 0;
         }
+    }
+
+    private function isFirstPageUrlThatCurrentUrl() : bool {
+        if ($this->currentUrl === $this->stealPaging::getFirstPageUrl())
+            return true;
+        return false;
+    }
+
+    private function isTouchDivideException(\Exception $e) : bool {
+        if ($e instanceof CrossGenerationException) return true;
+        if ($e instanceof OverLastPageException) return true;
+        return false;
     }
 
     /**
      * @param int $breakpointId
      * @param     $generation
      *
-     * @throws \Exception
+     * @throws CrossGenerationException
+     * @throws OverLastPageException
      */
     private function paging(int $breakpointId, $generation) : void {
-        try {
-            $dataPageUrlList = $this->stealPaging->fetchDataPageUrlList();
-            $this->dataPageIterator($dataPageUrlList, $breakpointId, $generation);
-            $this->setUrl($this->nextUrl());
-        } catch (OverLastPageException $e) {
-            $this->nextGeneration();
-        } catch (CrossGenerationException $e) {
-            $this->nextGeneration();
-        } catch (\Exception $e) {
-            throw $e;
-        }
+        $dataPageUrlList = $this->stealPaging->fetchDataPageUrlList();
+        $this->dataPageIterator($dataPageUrlList, $breakpointId, $generation);
+        $this->setUrl($this->nextUrl());
     }
 
     /**
