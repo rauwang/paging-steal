@@ -137,8 +137,9 @@ class PagingStealController
         // 头节点已爬取，尾节点未爬取，则返回当前断点id
         if ($isStoleWithFirstNode) return $breakpointId;
 
-        $lastDataPage = $this->dataPageController->findDataPage($this->stealPaging->getLastNodeUrl());
+        $lastNodeUrl = $this->stealPaging->getLastNodeUrl();
         if ($isStoleWithLastNode) { // 头节点未爬取，尾节点已爬取
+            $lastDataPage = $this->dataPageController->findDataPage($lastNodeUrl);
             $offset = $breakpointController->countLengthAfterThisBreakpointId($lastDataPage->getBreakpointId(), $targetId, $generation);
             $this->setUrl($this->nextUrl($offset));
             return 0;
@@ -146,7 +147,7 @@ class PagingStealController
         // 根据断点记录定位到的当前分页，未爬取过的情况下（头尾节点都未爬取）
         // 判断该断点是否存在已爬的数据页
         // 若存在已爬的数据页，则以断点的长度为偏移值，递进到已爬的分页，并判断其节点的世代情况，返回断点id
-        if ($this->dataPageController->existsWithBreakpoint($lastDataPage->getBreakpointId(), $generation)) {
+        if ($this->dataPageController->existsWithBreakpoint($breakpointId, $generation)) {
             $offset = $breakpointController->countBreakpointLength($targetId, $generation);
             while (true) {
                 $this->setUrl($this->nextUrl($offset));
